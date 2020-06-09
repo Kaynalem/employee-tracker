@@ -84,7 +84,7 @@ async function mainMenu() {
                 //await updateEmployeeManager();
                 break;
             case 'View All Roles':
-                //await viewAllRoles();                
+                await viewAllRoles();                
                 break;
             case 'Add a Role':
                 //await addRole();
@@ -120,6 +120,21 @@ function viewAllEmployees() {
     employee LEFT JOIN employee manager ON employee.manager_id = manager.id 
     INNER JOIN role ON employee.role_id = role.id 
     INNER JOIN department ON role.department_id = department.id 
+    ORDER BY ID ASC`,
+    function (err, res) {
+    console.table(res);
+    if (err) throw err;
+    mainMenu()
+    });
+}
+
+// when View All Roles is selected, display formatted table showing job title, role id, the department that role belongs to, and the salary for that role
+//sorts out duplicates
+function viewAllRoles() {
+    connection.query(`SELECT DISTINCT role.id, role.title, department.name AS department, role.salary 
+    FROM role 
+    INNER JOIN department ON role.department_id = department.id
+    INNER JOIN employee ON employee.role_id = role.id
     ORDER BY ID ASC`,
     function (err, res) {
     console.table(res);
