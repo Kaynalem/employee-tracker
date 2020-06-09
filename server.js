@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     user: 'root',
     // Your MySQL password
     password: 'your password',
-    database: 'employeesDB'
+    database: 'employeesdb'
 });
 
 connection.connect(err => {
@@ -57,7 +57,6 @@ async function mainMenu() {
         name: 'choice',
         message: 'What would you like to do?',
         choices: choices,
-        pageSize: choices.length
         }
     ])
     .then(async function(answers){
@@ -129,9 +128,8 @@ function viewAllEmployees() {
 }
 
 // when View All Roles is selected, display formatted table showing job title, role id, the department that role belongs to, and the salary for that role
-//sorts out duplicates
 function viewAllRoles() {
-    connection.query(`SELECT DISTINCT role.id, role.title, department.name AS department, role.salary 
+    connection.query(`SELECT role.id, role.title, department.name AS department, role.salary 
     FROM role 
     INNER JOIN department ON role.department_id = department.id
     INNER JOIN employee ON employee.role_id = role.id
