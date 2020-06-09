@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     user: 'root',
     // Your MySQL password
     password: 'your password',
-    //database: 'employeesDB'
+    database: 'employeesDB'
 });
 
 connection.connect(err => {
@@ -33,7 +33,7 @@ connection.connect(err => {
 `)
     mainMenu();
 });
-
+// Main menu prompts
 async function mainMenu() {
     let choices = [
         'View All Employees',
@@ -62,7 +62,7 @@ async function mainMenu() {
     .then(async function(answers){
         switch(answers.choice){
             case 'View All Employees':
-                //await viewAllEmployees();                
+                await viewAllEmployees();                
                 break;
             case 'View All Employees by Department':
                 //await viewEmployeesByDepartment();                
@@ -107,5 +107,19 @@ async function mainMenu() {
                 connection.end();
                 break;
         }
+    });
+}
+// when View All employees is selected, display formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
+function viewAllEmployees() {
+    connection.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, concat(manager.first_name, ' ' ,  manager.last_name) AS manager 
+    FROM employee 
+    employee LEFT JOIN employee manager ON employee.manager_id = manager.id 
+    INNER JOIN role ON employee.role_id = role.id 
+    INNER JOIN department ON role.department_id = department.id 
+    ORDER BY ID ASC`,
+    function (err, res) {
+    console.table(res);
+    if (err) throw err;
+    mainMenu()
     });
 }
