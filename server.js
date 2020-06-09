@@ -46,6 +46,7 @@ async function mainMenu() {
         'View All Roles',
         'Add a Role',
         'Remove Role',
+        'View All Departments',
         'Add a Department',
         'Remove Department',
         'View Department Budget',
@@ -91,6 +92,9 @@ async function mainMenu() {
             case 'Remove Role':
                 //await removeRole();
                 break;
+            case 'View All Departments':
+                await viewAllDepartments();
+                break;
             case 'Add a Department':
                 //await addDepartment();
                 break;
@@ -109,13 +113,25 @@ async function mainMenu() {
         }
     });
 }
-// when View All employees is selected, display formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
+// when View All Employees is selected, display formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
 function viewAllEmployees() {
     connection.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, concat(manager.first_name, ' ' ,  manager.last_name) AS manager 
     FROM employee 
     employee LEFT JOIN employee manager ON employee.manager_id = manager.id 
     INNER JOIN role ON employee.role_id = role.id 
     INNER JOIN department ON role.department_id = department.id 
+    ORDER BY ID ASC`,
+    function (err, res) {
+    console.table(res);
+    if (err) throw err;
+    mainMenu()
+    });
+}
+
+// when View All Departments is selected, display formatted table showing department names and department ids
+function viewAllDepartments() {
+    connection.query(`SELECT id, name AS department 
+    FROM department 
     ORDER BY ID ASC`,
     function (err, res) {
     console.table(res);
