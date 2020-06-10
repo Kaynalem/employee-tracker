@@ -180,52 +180,52 @@ async function addDepartment() {
 
 // when Add a Role is selected user prompted to enter the name, salary, and department for the role and that role is added to the database
 async function addRole() {
-    var departmentQuery = 'SELECT * FROM department;';
-        connection.query(departmentQuery, async function (err, departments) {
-        await inquirer.prompt([
-            {
-                type: 'input',
-                name: 'role',
-                message: 'What is the name of the role?',
-            },
-            {
-                type: 'input',
-                name: 'salary',
-                message: 'What is the salary of the role?',
-            },
-            {
-                type: 'list',
-                name: 'choice',
-                message: 'What department does this role belong to?',
-                choices: 
-                    //populate from db
-                    async function () {
-                        var departmentChoices = [];
-                        for (var i = 0; i < departments.length; i++) {
-                            departmentChoices.push(departments[i].name);
-                        }
-                        return departmentChoices;
+    connection.query('SELECT * FROM department;', 
+    async function (err, departments) {
+    await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'role',
+            message: 'What is the name of the role?',
+        },
+        {
+            type: 'input',
+            name: 'salary',
+            message: 'What is the salary of the role?',
+        },
+        {
+            type: 'list',
+            name: 'choice',
+            message: 'What department does this role belong to?',
+            choices: 
+                //populate from db
+                async function () {
+                    var departmentChoices = [];
+                    for (var i = 0; i < departments.length; i++) {
+                        departmentChoices.push(departments[i].name);
                     }
-            },
-        ])
-        .then(async function(answer){
-            for (var i = 0; i < departments.length; i++) {
-                if (departments[i].name === answer.choice) {
-                    answer.department_id = departments[i].id;
+                    return departmentChoices;
                 }
+        },
+    ])
+    .then(async function(answer){
+        for (var i = 0; i < departments.length; i++) {
+            if (departments[i].name === answer.choice) {
+                answer.department_id = departments[i].id;
             }
-            connection.query(
-                'INSERT INTO role SET ?',
-                {
-                    title: answer.role,
-                    salary: answer.salary,
-                    department_id: answer.department_id
-                }, 
-                function (err) {
-                if (err) throw err;
-                console.table('Added new role: ' + answer.role);
-                    mainMenu();
-                });
+        }
+        connection.query(
+            'INSERT INTO role SET ?',
+            {
+                title: answer.role,
+                salary: answer.salary,
+                department_id: answer.department_id
+            }, 
+            function (err) {
+            if (err) throw err;
+            console.table('Added new role: ' + answer.role);
+                mainMenu();
             });
         });
-    }
+    });
+}
