@@ -10,7 +10,7 @@ const connection = mysql.createConnection({
     // Your MySQL username
     user: 'root',
     // Your MySQL password
-    password: 'your password',
+    password: 'Almaz9488!',
     database: 'employeesdb'
 });
 
@@ -128,11 +128,12 @@ function viewAllEmployees() {
 }
 
 // when View All Roles is selected, display formatted table showing job title, role id, the department that role belongs to, and the salary for that role
+// only shows the different roles does not show duplicates since each role has a specific salary
+// to show based employees/duplicates, add INNER JOIN employee ON employee.role_id = role.id
 function viewAllRoles() {
     connection.query(`SELECT role.id, role.title, department.name AS department, role.salary 
     FROM role 
     INNER JOIN department ON role.department_id = department.id
-    INNER JOIN employee ON employee.role_id = role.id
     ORDER BY ID ASC`,
     function (err, res) {
     console.table(res);
