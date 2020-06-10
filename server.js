@@ -182,6 +182,7 @@ async function addDepartment() {
 async function addRole() {
     connection.query('SELECT * FROM department;', 
     async function (err, departments) {
+    if (err) throw err;
     await inquirer.prompt([
         {
             type: 'input',
