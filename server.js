@@ -10,7 +10,7 @@ const connection = mysql.createConnection({
     // Your MySQL username
     user: 'root',
     // Your MySQL password
-    password: 'Almaz9488!',
+    password: 'your password',
     database: 'employeesdb'
 });
 
@@ -95,7 +95,7 @@ async function mainMenu() {
                 await viewAllDepartments();
                 break;
             case 'Add a Department':
-                //await addDepartment();
+                await addDepartment();
                 break;
             case 'Remove Department':
                 //await removeDepartment();                
@@ -136,8 +136,8 @@ function viewAllRoles() {
     INNER JOIN department ON role.department_id = department.id
     ORDER BY ID ASC`,
     function (err, res) {
-    console.table(res);
     if (err) throw err;
+    console.table(res);
     mainMenu()
     });
 }
@@ -148,8 +148,32 @@ function viewAllDepartments() {
     FROM department 
     ORDER BY ID ASC`,
     function (err, res) {
-    console.table(res);
     if (err) throw err;
+    console.table(res);
     mainMenu()
+    });
+}
+
+// when Add a Department is selected
+async function addDepartment() {
+    await inquirer.prompt([
+        {
+        type: 'input',
+        name: 'department',
+        message: 'What department would you like to add?',
+        }
+    ])
+    .then(async function(answer){
+        connection.query(
+            'INSERT INTO department SET ?',
+            {
+                name: answer.department,
+            },
+            function (err, res) {
+                if (err) throw err;
+                console.table('Added ' + answer.department + ' department');
+                mainMenu();
+            }
+        );
     });
 }
