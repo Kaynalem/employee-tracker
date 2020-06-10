@@ -180,9 +180,7 @@ async function addDepartment() {
 
 // when Add a Role is selected user prompted to enter the name, salary, and department for the role and that role is added to the database
 async function addRole() {
-    var roleQuery = 'SELECT * FROM role;';
     var departmentQuery = 'SELECT * FROM department;';
-    connection.query(roleQuery, async function (err, roles) {
         connection.query(departmentQuery, async function (err, departments) {
         await inquirer.prompt([
             {
@@ -230,5 +228,4 @@ async function addRole() {
                 });
             });
         });
-    });
-}
+    }
