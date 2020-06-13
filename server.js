@@ -74,7 +74,7 @@ async function mainMenu() {
                 await addEmployee();
                 break;
             case 'Remove Employee':
-                //await removeEmployee();
+                await removeEmployee();
                 break;
             case 'Update Employee Role':
                 await updateEmployeeRole();
@@ -119,7 +119,7 @@ function viewAllEmployees() {
     employee LEFT JOIN employee manager ON employee.manager_id = manager.id 
     INNER JOIN role ON employee.role_id = role.id 
     INNER JOIN department ON role.department_id = department.id 
-    ORDER BY ID ASC`,
+    ORDER BY ID ASC;`,
     function (err, res) {
     console.table(res);
     if (err) throw err;
@@ -134,7 +134,7 @@ function viewAllRoles() {
     connection.query(`SELECT role.id, role.title, department.name AS department, role.salary 
     FROM role 
     INNER JOIN department ON role.department_id = department.id
-    ORDER BY ID ASC`,
+    ORDER BY ID ASC;`,
     function (err, res) {
     if (err) throw err;
     console.table(res);
@@ -146,7 +146,7 @@ function viewAllRoles() {
 function viewAllDepartments() {
     connection.query(`SELECT id, name AS department 
     FROM department 
-    ORDER BY ID ASC`,
+    ORDER BY ID ASC;`,
     function (err, res) {
     if (err) throw err;
     console.table(res);
@@ -370,7 +370,7 @@ async function updateEmployeeRole() {
         });
     });
 }
-// when Update Employee Manager is selected user is prompted to select an employee to update and their new Manager and this information is updated in the database
+// when Update Employee Manager is selected user is prompted to select an employee to update and their new manager and this information is updated in the database
 async function updateEmployeeManager() {
     
     //get employees from db
@@ -405,8 +405,7 @@ async function updateEmployeeManager() {
                     }
                     return employeeChoices;
                 }
-        },
-        
+        }
     ]).then(async function(answer){
         for (var i = 0; i < employees.length; i++) {
             if (employees[i].Employee === answer.employee) {
@@ -429,3 +428,59 @@ async function updateEmployeeManager() {
         });
     });
 }
+
+// when Remove Employee is selected user is prompted to select an employee to delete and their information is removed from the database
+async function removeEmployee() {
+    //get employees from db
+    connection.query(`SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee ORDER BY Employee ASC;`, 
+    async function (err, employees) {
+    if (err) throw err;
+    await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employee',
+            message: 'Which employee would you like to remove?',
+            choices: 
+                //populate from db
+                async function () {
+                    var employeeChoices = [];
+                    for (var i = 0; i < employees.length; i++) {
+                        employeeChoices.push(employees[i].Employee);
+                    }
+                    return employeeChoices;
+                }
+        }, 
+        {
+            // confirm deletion of employee
+            name: "confirm",
+            type: "list",
+            message: "Are you sure you would like to remove this employee?",
+            choices: ["NO", "YES"]
+        }
+    ]).then(async function(answer){
+        if(answer.confirm == "YES"){
+            for (var i = 0; i < employees.length; i++) {
+                if (employees[i].Employee === answer.employee) {
+                    employeeID = employees[i].id;
+                }
+            }
+            //delete employee selected
+            connection.query(
+                `DELETE FROM employee WHERE id=${employeeID};`,
+                function (err) {
+                if (err) throw err;
+                console.table('Employee ' + answer.employee + ' has been removed.');
+                    mainMenu();
+                });
+            } else {
+                    
+                // if NO selected, go back to main menu
+                console.log('Employee ' + answer.employee + ' was not removed.');
+
+                // back to main menu
+                mainMenu();
+            }
+        });
+    });
+}
+
