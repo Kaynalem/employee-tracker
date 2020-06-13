@@ -71,7 +71,7 @@ async function mainMenu() {
                 //await viewEmployeesByManager();                
                 break;
             case 'Add Employee':
-                //await addEmployee();
+                await addEmployee();
                 break;
             case 'Remove Employee':
                 //await removeEmployee();
@@ -229,4 +229,80 @@ async function addRole() {
             });
         });
     });
+}
+// when Add Employee is selected user is prompted to enter the employee’s first name, last name, role, and manager and that employee is added to the database
+async function addEmployee() {
+    // get roles from db
+    connection.query('SELECT * FROM role;', 
+    async function (err, roles) {
+        //get managers from db
+        connection.query(`SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee ORDER BY Employee ASC;`, 
+        async function (err, managers) {
+    if (err) throw err;
+    await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'first_name',
+            message: 'What is the employee\'s first name?',
+        },
+        {
+            type: 'input',
+            name: 'last_name',
+            message: 'What is the employee\'s last name?',
+        },
+        {
+            type: 'list',
+            name: 'role',
+            message: 'What is the employee\'s role?',
+            choices: 
+                //populate from db
+                async function () {
+                    var roleChoices = [];
+                    for (var i = 0; i < roles.length; i++) {
+                        roleChoices.push(roles[i].title);
+                    }
+                    return roleChoices;
+                }
+        },
+        {
+            type: 'list',
+            name: 'manager',
+            message: 'Who is the employee\'s manager?',
+            choices: 
+                //populate from db
+                async function () {
+                    var managerChoices = [];
+                    for (var i = 0; i < managers.length; i++) {
+                        managerChoices.push(managers[i].Employee);
+                    }
+                    return managerChoices;
+                }
+        }
+    ]).then(async function(answer){
+        for (var i = 0; i < roles.length; i++) {
+            if (roles[i].title === answer.role) {
+                answer.role_id = roles[i].id;
+            }
+        }
+        for (var i = 0; i < managers.length; i++) {
+            if (managers[i].Employee === answer.manager) {
+                answer.manager_id = managers[i].id;
+            }
+        }
+        connection.query(
+            'INSERT INTO employee SET ?',
+            {
+                first_name: answer.first_name,
+                last_name: answer.last_name,
+                role_id: answer.role_id,
+                manager_id: answer.manager_id
+            }, 
+            function (err) {
+            if (err) throw err;
+            console.table('Added new employee: ' + answer.first_name + ' ' + answer.last_name);
+                mainMenu();
+            });
+        });
+    });
+});
 }
