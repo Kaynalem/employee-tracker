@@ -37,19 +37,14 @@ connection.connect(err => {
 async function mainMenu() {
     let choices = [
         'View All Employees',
-        'View All Employees By Department',
-        'View All Employees By Manager',
         'Add Employee',
         'Remove Employee',
         'Update Employee Role',
         'Update Employee Manager',
         'View All Roles',
         'Add a Role',
-        'Remove Role',
         'View All Departments',
         'Add a Department',
-        'Remove Department',
-        'View Department Budget',
         'Exit']
     await inquirer.prompt([
         {
@@ -57,18 +52,13 @@ async function mainMenu() {
         name: 'choice',
         message: 'What would you like to do?',
         choices: choices,
+        pageSize: choices.length 
         }
     ])
     .then(async function(answers){
         switch(answers.choice){
             case 'View All Employees':
                 await viewAllEmployees();                
-                break;
-            case 'View All Employees by Department':
-                //await viewEmployeesByDepartment();                
-                break;
-            case 'View All Employees by Manager':
-                //await viewEmployeesByManager();                
                 break;
             case 'Add Employee':
                 await addEmployee();
@@ -88,20 +78,11 @@ async function mainMenu() {
             case 'Add a Role':
                 await addRole();
                 break;
-            case 'Remove Role':
-                //await removeRole();
-                break;
             case 'View All Departments':
                 await viewAllDepartments();
                 break;
             case 'Add a Department':
                 await addDepartment();
-                break;
-            case 'Remove Department':
-                //await removeDepartment();                
-                break;
-            case 'View Department Budgets':
-                //await viewDepartmentBudgets();                
                 break;
             case 'Exit':  
                 connection.end();   
@@ -469,13 +450,13 @@ async function removeEmployee() {
                 `DELETE FROM employee WHERE id=${employeeID};`,
                 function (err) {
                 if (err) throw err;
-                console.table('Employee ' + answer.employee + ' has been removed.');
+                console.table('Employee ' + answer.employee + ' has been removed');
                     mainMenu();
                 });
             } else {
                     
                 // if NO selected, go back to main menu
-                console.log('Employee ' + answer.employee + ' was not removed.');
+                console.table('Employee ' + answer.employee + ' was not removed');
 
                 // back to main menu
                 mainMenu();
@@ -483,4 +464,3 @@ async function removeEmployee() {
         });
     });
 }
-
