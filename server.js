@@ -77,7 +77,7 @@ async function mainMenu() {
                 //await removeEmployee();
                 break;
             case 'Update Employee Role':
-                //await updateEmployeeRole();
+                await updateEmployeeRole();
                 break;
             case 'Update Employee Manager':
                 //await updateEmployeeManager();
@@ -212,7 +212,7 @@ async function addRole() {
     .then(async function(answer){
         for (var i = 0; i < departments.length; i++) {
             if (departments[i].name === answer.choice) {
-                answer.department_id = departments[i].id;
+                departmentID = departments[i].id;
             }
         }
         connection.query(
@@ -220,7 +220,7 @@ async function addRole() {
             {
                 title: answer.role,
                 salary: answer.salary,
-                department_id: answer.department_id
+                department_id: departmentID
             }, 
             function (err) {
             if (err) throw err;
@@ -235,74 +235,138 @@ async function addEmployee() {
     // get roles from db
     connection.query('SELECT * FROM role;', 
     async function (err, roles) {
-        //get managers from db
+        if (err) throw err;
+        //get employees from db
         connection.query(`SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee ORDER BY Employee ASC;`, 
         async function (err, managers) {
-    if (err) throw err;
-    await inquirer.prompt([
-        {
-            type: 'input',
-            name: 'first_name',
-            message: 'What is the employee\'s first name?',
-        },
-        {
-            type: 'input',
-            name: 'last_name',
-            message: 'What is the employee\'s last name?',
-        },
-        {
-            type: 'list',
-            name: 'role',
-            message: 'What is the employee\'s role?',
-            choices: 
-                //populate from db
-                async function () {
-                    var roleChoices = [];
-                    for (var i = 0; i < roles.length; i++) {
-                        roleChoices.push(roles[i].title);
-                    }
-                    return roleChoices;
-                }
-        },
-        {
-            type: 'list',
-            name: 'manager',
-            message: 'Who is the employee\'s manager?',
-            choices: 
-                //populate from db
-                async function () {
-                    var managerChoices = [];
-                    for (var i = 0; i < managers.length; i++) {
-                        managerChoices.push(managers[i].Employee);
-                    }
-                    return managerChoices;
-                }
-        }
-    ]).then(async function(answer){
-        for (var i = 0; i < roles.length; i++) {
-            if (roles[i].title === answer.role) {
-                answer.role_id = roles[i].id;
-            }
-        }
-        for (var i = 0; i < managers.length; i++) {
-            if (managers[i].Employee === answer.manager) {
-                answer.manager_id = managers[i].id;
-            }
-        }
-        connection.query(
-            'INSERT INTO employee SET ?',
+        if (err) throw err;
+        await inquirer.prompt([
             {
-                first_name: answer.first_name,
-                last_name: answer.last_name,
-                role_id: answer.role_id,
-                manager_id: answer.manager_id
-            }, 
-            function (err) {
-            if (err) throw err;
-            console.table('Added new employee: ' + answer.first_name + ' ' + answer.last_name);
-                mainMenu();
+                type: 'input',
+                name: 'first_name',
+                message: 'What is the employee\'s first name?',
+            },
+            {
+                type: 'input',
+                name: 'last_name',
+                message: 'What is the employee\'s last name?',
+            },
+            {
+                type: 'list',
+                name: 'role',
+                message: 'What is the employee\'s role?',
+                choices: 
+                    //populate from db
+                    async function () {
+                        var roleChoices = [];
+                        for (var i = 0; i < roles.length; i++) {
+                            roleChoices.push(roles[i].title);
+                        }
+                        return roleChoices;
+                    }
+            },
+            {
+                type: 'list',
+                name: 'manager',
+                message: 'Who is the employee\'s manager?',
+                choices: 
+                    //populate from db
+                    async function () {
+                        var managerChoices = [];
+                        for (var i = 0; i < managers.length; i++) {
+                            managerChoices.push(managers[i].Employee);
+                        }
+                        return managerChoices;
+                    }
+            }
+        ]).then(async function(answer){
+            for (var i = 0; i < roles.length; i++) {
+                if (roles[i].title === answer.role) {
+                    roleID = roles[i].id;
+                }
+            }
+            for (var i = 0; i < managers.length; i++) {
+                if (managers[i].Employee === answer.manager) {
+                    managerID = managers[i].id;
+                }
+            }
+            connection.query(
+                'INSERT INTO employee SET ?',
+                {
+                    first_name: answer.first_name,
+                    last_name: answer.last_name,
+                    role_id: roleID,
+                    manager_id: managerID
+                }, 
+                function (err) {
+                if (err) throw err;
+                console.table('Added new employee: ' + answer.first_name + ' ' + answer.last_name);
+                    mainMenu();
+                });
             });
         });
     });
-});
+}
+// when Update Employee Role is selected user is prompted to select an employee to update and their new role and this information is updated in the database
+async function updateEmployeeRole() {
+    // get roles from db
+    connection.query('SELECT * FROM role;', 
+    async function (err, roles) {
+        if (err) throw err;
+        //get employees from db
+        connection.query(`SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee ORDER BY Employee ASC;`, 
+        async function (err, employees) {
+        if (err) throw err;
+        await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: 'Which employee would you like to update?',
+                choices: 
+                    //populate from db
+                    async function () {
+                        var employeeChoices = [];
+                        for (var i = 0; i < employees.length; i++) {
+                            employeeChoices.push(employees[i].Employee);
+                        }
+                        return employeeChoices;
+                    }
+            },
+            {
+                type: 'list',
+                name: 'role',
+                message: 'What is the employee\'s new role?',
+                choices: 
+                    //populate from db
+                    async function () {
+                        var roleChoices = [];
+                        for (var i = 0; i < roles.length; i++) {
+                            roleChoices.push(roles[i].title);
+                        }
+                        return roleChoices;
+                    }
+            }
+            
+        ]).then(async function(answer){
+            for (var i = 0; i < roles.length; i++) {
+                if (roles[i].title === answer.role) {
+                    roleID = roles[i].id;
+                }
+            }
+            for (var i = 0; i < employees.length; i++) {
+                if (employees[i].Employee === answer.employee) {
+                    employeeID = employees[i].id;
+                }
+            }
+            //update employee with new role
+            connection.query(
+                `UPDATE employee SET role_id = ${roleID} WHERE id = ${employeeID}`,
+                function (err) {
+                if (err) throw err;
+                console.table(answer.employee + ' role updated to ' + answer.role);
+                    mainMenu();
+                });
+            });
+        });
+    });
 }
