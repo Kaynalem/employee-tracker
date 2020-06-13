@@ -80,7 +80,7 @@ async function mainMenu() {
                 await updateEmployeeRole();
                 break;
             case 'Update Employee Manager':
-                //await updateEmployeeManager();
+                await updateEmployeeManager();
                 break;
             case 'View All Roles':
                 await viewAllRoles();                
@@ -366,6 +366,65 @@ async function updateEmployeeRole() {
                 console.table(answer.employee + ' role updated to ' + answer.role);
                     mainMenu();
                 });
+            });
+        });
+    });
+}
+// when Update Employee Manager is selected user is prompted to select an employee to update and their new Manager and this information is updated in the database
+async function updateEmployeeManager() {
+    
+    //get employees from db
+    connection.query(`SELECT employee.id, concat(employee.first_name, ' ' ,  employee.last_name) AS Employee FROM employee ORDER BY Employee ASC;`, 
+    async function (err, employees) {
+    if (err) throw err;
+    await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employee',
+            message: 'Which employee would you like to update?',
+            choices: 
+                //populate from db
+                async function () {
+                    var employeeChoices = [];
+                    for (var i = 0; i < employees.length; i++) {
+                        employeeChoices.push(employees[i].Employee);
+                    }
+                    return employeeChoices;
+                }
+        },
+        {
+            type: 'list',
+            name: 'manager',
+            message: 'Who is their new manager?',
+            choices: 
+                //populate from db
+                async function () {
+                    var employeeChoices = [];
+                    for (var i = 0; i < employees.length; i++) {
+                        employeeChoices.push(employees[i].Employee);
+                    }
+                    return employeeChoices;
+                }
+        },
+        
+    ]).then(async function(answer){
+        for (var i = 0; i < employees.length; i++) {
+            if (employees[i].Employee === answer.employee) {
+                employeeID = employees[i].id;
+            }
+        }
+        for (var i = 0; i < employees.length; i++) {
+            if (employees[i].Employee === answer.manager) {
+                managerID = employees[i].id;
+            }
+        }
+        //update employee with new manager
+        connection.query(
+            `UPDATE employee SET manager_id = ${managerID} WHERE id = ${employeeID}`,
+            function (err) {
+            if (err) throw err;
+            console.table(answer.employee + ' manager updated to ' + answer.manager);
+                mainMenu();
             });
         });
     });
