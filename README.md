@@ -27,7 +27,7 @@
   * To execute the `schema.sql` file, type into the MySQL command line: `source db/schema.sql`
   * To execute the `seeds.sql` file, type into the MySQL command line: `source db/seeds.sql`
   * To exit the MySQL command line, type `quit;` or `exit;`
-  * Once updated, just run npm start in your terminal to get started!
+  * Once updated, just run `npm start` in your terminal to get started!
   ## License
   This project is licensed under the MIT license.
   ## Contributing
